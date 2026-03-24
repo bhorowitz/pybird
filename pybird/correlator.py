@@ -382,7 +382,7 @@ class Correlator(object):
             if self.c['with_emu']: self.c['with_bias'] = False # no such option when emulator is on since there is no speed gain (resummation is already emulated)
 
         if do_core:
-            self.bird = Bird(self.cosmo, with_bias=self.c["with_bias"], eft_basis=self.c["eft_basis"], with_stoch=self.c["with_stoch"], with_nnlo_counterterm=self.c["with_nnlo_counterterm"], co=self.co)
+            self.bird = Bird(self.cosmo, with_bias=self.c["with_bias"], eft_basis=self.c["eft_basis"], with_stoch=self.c["with_stoch"], with_nnlo_counterterm=self.c["with_nnlo_counterterm"], co=self.co, lya_tree=self.c.get("lya_tree", False))
             if self.c["with_nnlo_counterterm"]: self.bird.Pnnlo = self.co.k**4 * self.bird.P11 
             if not self.c["with_emu"]: 
                 self.nonlinear.PsCf(self.bird)

@@ -46,6 +46,8 @@ class Cosmo():
         cosmo = {}
 
         log10kmax = 0.
+        if "kmax" in self.c and self.c["kmax"] > 1.0:
+            log10kmax = np.log10(self.c["kmax"])
         #if self.c["with_nnlo_counterterm"]: log10kmax = 1 # slower, but required for the wiggle-no-wiggle split scheme
         cosmo["kk"] = logspace(-5, log10kmax, 512)  # k in h/Mpc
 

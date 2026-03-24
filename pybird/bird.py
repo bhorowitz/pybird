@@ -59,7 +59,7 @@ class Bird(object):
         reducePsCfl(): Regroup terms that share the same EFT parameters.
     """
 
-    def __init__(self, cosmology=None, with_bias=True, eft_basis='eftoflss', with_stoch=False, with_nnlo_counterterm=False, co=co, which='full'):
+    def __init__(self, cosmology=None, with_bias=True, eft_basis='eftoflss', with_stoch=False, with_nnlo_counterterm=False, co=co, which='full', lya_tree=False):
 
         self.co = co
         self.with_bias = with_bias
@@ -67,6 +67,7 @@ class Bird(object):
         self.with_stoch = with_stoch
         self.with_nnlo_counterterm = with_nnlo_counterterm
         self.with_tidal_alignments = self.co.with_tidal_alignments
+        self.lya_tree = lya_tree
 
         if cosmology is not None: self.setcosmo(cosmology)
 
@@ -120,6 +121,7 @@ class Bird(object):
             self.b13 = empty(shape=(self.co.Nl, self.co.N13))
             self.b22 = empty(shape=(self.co.Nl, self.co.N22))
             self.bct = empty(shape=(self.co.Nl))
+            self.lya_tree_coeff = zeros(shape=(self.co.Nl, 3))
         else:
             self.b11 = empty(shape=(self.co.N11))
             self.bct = empty(shape=(self.co.Nct))
@@ -178,8 +180,7 @@ class Bird(object):
 
         if self.Pin is not None:
 
-
-            self.Plin = interp1d(self.kin, self.Pin, kind='cubic', axis=-1)
+            self.Plin = interp1d(self.kin, self.Pin, kind='cubic', axis=-1, fill_value='extrapolate')
             self.P11 = self.Plin(self.co.k)
 
         else:
@@ -229,6 +230,7 @@ class Bird(object):
             V12t = self.V12t
 
         b1 = bias["b1"]
+        b_eta = bias.get("b_eta", 0.0)
         b2 = bias["b2"]
         b3 = bias["b3"]
         b4 = bias["b4"]
@@ -239,7 +241,15 @@ class Bird(object):
         elif self.eft_basis == 'eastcoast': # inversion of (2.23) of 2004.10607
             ct0 = bias["c0"] - f/3. * bias["c2"] + 3/35. * f**2 * bias["c4"]
             ct2 = bias["c2"] - 6/7. * f * bias["c4"]
-            ct4 = bias["c4"]
+            if self.co.halohalo:
+                if self.lya_tree:
+                    for i in range(self.co.Nl):
+                        l = 2 * i
+                        self.lya_tree_coeff = self.lya_tree_coeff.at[i].set(array([
+                            b1**2 * mu[0][l],
+                            -2.0 * b1 * b_eta * f * mu[2][l],
+                            b_eta**2 * f**2 * mu[4][l],
+                        ]))
 
         if self.with_stoch:
             if self.eft_basis in ["eastcoast", "westcoast"]:
@@ -250,6 +260,15 @@ class Bird(object):
         
 
         if self.co.halohalo:
+
+            if self.lya_tree:
+                for i in range(self.co.Nl):
+                    l = 2 * i
+                    self.lya_tree_coeff = array([
+                        b1**2 * mu[0][l],
+                        -2.0 * b1 * b_eta * f * mu[2][l],
+                        b_eta**2 * f**2 * mu[4][l],
+                    ])
 
             if self.with_tidal_alignments: bq = bias["bq"]
 
@@ -324,6 +343,13 @@ class Bird(object):
             An array of 7 EFT parameters: b_1, b_2, b_3, b_4, c_{ct}/k_{nl}^2, c_{r,1}/k_{m}^2, c_{r,2}/k_{m}^2
         """
         if bs is not None: self.setBias(bs)
+        if self.lya_tree:
+            self.Ps = [None] * 2
+            self.Ps[0] = (self.lya_tree_coeff[0] + self.lya_tree_coeff[1] + self.lya_tree_coeff[2]) * self.P11
+            self.Ps[1] = zeros_like(self.Ps[0])
+            self.Ps = array(self.Ps)
+            if setfull: self.setfullPs()
+            return
         self.Ps = [None] * 2
         self.Ps[0] = einsum('l,x->lx', self.b11, self.P11)
         self.Ps[1] = einsum('lb,bx->lx', self.b22, self.P22) + einsum('lb,bx->lx', self.b13, self.P13) + einsum('l,x,x->lx', self.bct, self.co.k**2, self.P11) 
