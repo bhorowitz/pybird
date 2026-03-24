@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "sector": "13",
+  "channel_name": "T13_B_KKPAR",
+  "channel_id": 6,
+  "mu_power": 4,
+  "k_power_prefactor": 0,
+  "radial_rank": 0,
+  "symmetry": {
+    "type": "none",
+    "exchange_q_kmq": false
+  },
+  "master_family": "LOS_SHIFTED_J",
+  "terms": [],
+  "metadata": {
+    "status": "physically-zero",
+    "notes": "Binomial conservation in zkq = k*mu - zq forbids the explicit-mu / LOS-rank combinations needed to reach total mu^4 for KKPAR; the exact reduced coefficient is zero."
+  }
+}

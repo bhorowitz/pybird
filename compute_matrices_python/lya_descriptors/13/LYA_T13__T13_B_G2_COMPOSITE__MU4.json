@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "sector": "13",
+  "channel_name": "T13_B_G2_COMPOSITE",
+  "channel_id": 2,
+  "mu_power": 4,
+  "k_power_prefactor": 0,
+  "radial_rank": 0,
+  "symmetry": {
+    "type": "none",
+    "exchange_q_kmq": false
+  },
+  "master_family": "LOS_SHIFTED_J",
+  "terms": [],
+  "metadata": {
+    "status": "physically-zero",
+    "notes": "The kernel qdotkmq^2 - q^2*kmq^2 is isotropic in the LOS sense and the exact reduction emits only mu^0; the mu^4 slot is identically zero."
+  }
+}

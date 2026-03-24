@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "sector": "13",
+  "channel_name": "T13_B_ETAPI2PAR",
+  "channel_id": 9,
+  "mu_power": 6,
+  "k_power_prefactor": 0,
+  "radial_rank": 0,
+  "symmetry": {
+    "type": "none",
+    "exchange_q_kmq": false
+  },
+  "master_family": "LOS_SHIFTED_J",
+  "terms": [],
+  "metadata": {
+    "status": "physically-zero",
+    "notes": "The kernel is proportional to zq^2 * zkq^2, so the exact reduction tops out at mu^4; the mu^6 slot is identically zero."
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "format": "fftlog-packed-lower-triangular",
+  "artifact_role": "fftlog_packed_matrix",
+  "generation_mode": "production_kernel",
+  "sector": "13",
+  "channel_name": "T13_B_KKPAR",
+  "channel_id": 6,
+  "mu_power": 2,
+  "k_power": -2,
+  "storage": {
+    "packing": "lower-triangular",
+    "layout": "real-block-then-imag-block",
+    "nmax": 128,
+    "matrix_size": 129,
+    "packed_size": 8385,
+    "fftlog_bias": 3.4,
+    "k0": 5e-05,
+    "kmax": 100.0,
+    "evaluation_backend": "kernel-only"
+  },
+  "source_descriptor": "/home/ben.horowitz/lya_eft/CLASS-PT/pt_matrices/compute_matrices_python/lya_descriptors/13/LYA_T13__T13_B_KKPAR__MU2.json"
+}

@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "sector": "13",
+  "channel_name": "T13_B_PI2PAR_MAIN",
+  "channel_id": 7,
+  "mu_power": 4,
+  "k_power_prefactor": 0,
+  "radial_rank": 0,
+  "symmetry": {
+    "type": "none",
+    "exchange_q_kmq": false
+  },
+  "master_family": "LOS_SHIFTED_J",
+  "terms": [],
+  "metadata": {
+    "status": "physically-zero",
+    "notes": "Binomial conservation in zkq = k*mu - zq, together with qdotkmq carrying no LOS structure, forbids the combinations needed to reach total mu^4 for PI2PAR_MAIN; the exact reduced coefficient is zero."
+  }
+}

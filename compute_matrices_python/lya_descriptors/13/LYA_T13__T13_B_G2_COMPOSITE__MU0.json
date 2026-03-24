@@ -1,0 +1,202 @@
+{
+  "version": "1.0",
+  "sector": "13",
+  "channel_name": "T13_B_G2_COMPOSITE",
+  "channel_id": 2,
+  "mu_power": 0,
+  "k_power_prefactor": 0,
+  "radial_rank": 0,
+  "symmetry": {
+    "type": "none",
+    "exchange_q_kmq": false
+  },
+  "master_family": "LOS_SHIFTED_J",
+  "terms": [
+    {
+      "coeff_rational": {
+        "num": -1,
+        "den": 21
+      },
+      "los_rank_r": 0,
+      "delta_nu1": -2,
+      "delta_nu2": 1,
+      "master_component": "J",
+      "extra_k_power": -2,
+      "extra_mu_power": 0
+    },
+    {
+      "coeff_rational": {
+        "num": 4,
+        "den": 21
+      },
+      "los_rank_r": 0,
+      "delta_nu1": -1,
+      "delta_nu2": 0,
+      "master_component": "J",
+      "extra_k_power": -2,
+      "extra_mu_power": 0
+    },
+    {
+      "coeff_rational": {
+        "num": 4,
+        "den": 21
+      },
+      "los_rank_r": 0,
+      "delta_nu1": -1,
+      "delta_nu2": 1,
+      "master_component": "J",
+      "extra_k_power": 0,
+      "extra_mu_power": 0
+    },
+    {
+      "coeff_rational": {
+        "num": -2,
+        "den": 7
+      },
+      "los_rank_r": 0,
+      "delta_nu1": 0,
+      "delta_nu2": -1,
+      "master_component": "J",
+      "extra_k_power": -2,
+      "extra_mu_power": 0
+    },
+    {
+      "coeff_rational": {
+        "num": -4,
+        "den": 21
+      },
+      "los_rank_r": 0,
+      "delta_nu1": 0,
+      "delta_nu2": 0,
+      "master_component": "J",
+      "extra_k_power": 0,
+      "extra_mu_power": 0
+    },
+    {
+      "coeff_rational": {
+        "num": -2,
+        "den": 7
+      },
+      "los_rank_r": 0,
+      "delta_nu1": 0,
+      "delta_nu2": 1,
+      "master_component": "J",
+      "extra_k_power": 2,
+      "extra_mu_power": 0
+    },
+    {
+      "coeff_rational": {
+        "num": 4,
+        "den": 21
+      },
+      "los_rank_r": 0,
+      "delta_nu1": 1,
+      "delta_nu2": -2,
+      "master_component": "J",
+      "extra_k_power": -2,
+      "extra_mu_power": 0
+    },
+    {
+      "coeff_rational": {
+        "num": -4,
+        "den": 21
+      },
+      "los_rank_r": 0,
+      "delta_nu1": 1,
+      "delta_nu2": -1,
+      "master_component": "J",
+      "extra_k_power": 0,
+      "extra_mu_power": 0
+    },
+    {
+      "coeff_rational": {
+        "num": -4,
+        "den": 21
+      },
+      "los_rank_r": 0,
+      "delta_nu1": 1,
+      "delta_nu2": 0,
+      "master_component": "J",
+      "extra_k_power": 2,
+      "extra_mu_power": 0
+    },
+    {
+      "coeff_rational": {
+        "num": 4,
+        "den": 21
+      },
+      "los_rank_r": 0,
+      "delta_nu1": 1,
+      "delta_nu2": 1,
+      "master_component": "J",
+      "extra_k_power": 4,
+      "extra_mu_power": 0
+    },
+    {
+      "coeff_rational": {
+        "num": -1,
+        "den": 21
+      },
+      "los_rank_r": 0,
+      "delta_nu1": 2,
+      "delta_nu2": -3,
+      "master_component": "J",
+      "extra_k_power": -2,
+      "extra_mu_power": 0
+    },
+    {
+      "coeff_rational": {
+        "num": 4,
+        "den": 21
+      },
+      "los_rank_r": 0,
+      "delta_nu1": 2,
+      "delta_nu2": -2,
+      "master_component": "J",
+      "extra_k_power": 0,
+      "extra_mu_power": 0
+    },
+    {
+      "coeff_rational": {
+        "num": -2,
+        "den": 7
+      },
+      "los_rank_r": 0,
+      "delta_nu1": 2,
+      "delta_nu2": -1,
+      "master_component": "J",
+      "extra_k_power": 2,
+      "extra_mu_power": 0
+    },
+    {
+      "coeff_rational": {
+        "num": 4,
+        "den": 21
+      },
+      "los_rank_r": 0,
+      "delta_nu1": 2,
+      "delta_nu2": 0,
+      "master_component": "J",
+      "extra_k_power": 4,
+      "extra_mu_power": 0
+    },
+    {
+      "coeff_rational": {
+        "num": -1,
+        "den": 21
+      },
+      "los_rank_r": 0,
+      "delta_nu1": 2,
+      "delta_nu2": 1,
+      "master_component": "J",
+      "extra_k_power": 6,
+      "extra_mu_power": 0
+    }
+  ],
+  "metadata": {
+    "channel": "T13_B_G2_COMPOSITE",
+    "n_terms": 15,
+    "status": "sympy-reduced",
+    "reduction_source": "lya_reduction_sympy.generate_13_descriptors"
+  }
+}

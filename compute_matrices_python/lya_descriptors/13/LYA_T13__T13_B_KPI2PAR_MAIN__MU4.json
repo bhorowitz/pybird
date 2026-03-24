@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "sector": "13",
+  "channel_name": "T13_B_KPI2PAR_MAIN",
+  "channel_id": 10,
+  "mu_power": 4,
+  "k_power_prefactor": 0,
+  "radial_rank": 0,
+  "symmetry": {
+    "type": "none",
+    "exchange_q_kmq": false
+  },
+  "master_family": "LOS_SHIFTED_J",
+  "terms": [],
+  "metadata": {
+    "status": "physically-zero",
+    "notes": "The kernel qdotkmq * zq * zkq carries only two LOS factors beyond isotropic pieces, so the exact reduction emits mu^0 and mu^2 only; the mu^4 slot is identically zero."
+  }
+}

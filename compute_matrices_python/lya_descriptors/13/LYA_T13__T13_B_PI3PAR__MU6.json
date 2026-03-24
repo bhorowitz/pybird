@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "sector": "13",
+  "channel_name": "T13_B_PI3PAR",
+  "channel_id": 13,
+  "mu_power": 6,
+  "k_power_prefactor": 0,
+  "radial_rank": 0,
+  "symmetry": {
+    "type": "none",
+    "exchange_q_kmq": false
+  },
+  "master_family": "LOS_SHIFTED_J",
+  "terms": [],
+  "metadata": {
+    "status": "physically-zero",
+    "notes": "The exact PI3_parallel reduction combines qdotkmq*zq*zkq and an explicit mu^2 isotropic term, yielding only mu^0 and mu^2 after angular reduction; the mu^6 slot is identically zero."
+  }
+}

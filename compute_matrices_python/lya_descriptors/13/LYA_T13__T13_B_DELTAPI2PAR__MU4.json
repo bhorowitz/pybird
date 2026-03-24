@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "sector": "13",
+  "channel_name": "T13_B_DELTAPI2PAR",
+  "channel_id": 8,
+  "mu_power": 4,
+  "k_power_prefactor": 0,
+  "radial_rank": 0,
+  "symmetry": {
+    "type": "none",
+    "exchange_q_kmq": false
+  },
+  "master_family": "LOS_SHIFTED_J",
+  "terms": [],
+  "metadata": {
+    "status": "physically-zero",
+    "notes": "The kernel is proportional to zkq^2 with no additional LOS source, so the exact reduction emits only mu^0 and mu^2; the mu^4 slot is identically zero."
+  }
+}
