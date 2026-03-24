@@ -8,7 +8,12 @@ import json
 from pathlib import Path
 
 from lya_channel_manifest import write_manifest
-from lya_descriptor_writer import DEFAULT_BIAS, write_debug_radial_probe, write_packed_fftlog_matrices
+from lya_descriptor_writer import (
+    DEFAULT_FFTLOGBIAS,
+    write_debug_radial_probe,
+    write_packed_fftlog_matrices,
+    write_radial_1d_table,
+)
 
 
 ROOT = Path(__file__).resolve().parent
@@ -44,7 +49,7 @@ def main() -> None:
 
     for entry in manifest["entries"]:
         print('Processing manifest entry: ',entry["channel_name"], entry["mu_power"])
-        if entry["status"] != "sympy-reduced":
+        if entry["status"] not in {"sympy-reduced", "radial-1d"}:
             skipped.append((entry["channel_name"], entry["mu_power"], entry["status"]))
             continue
         if allowed_channels and entry["channel_name"] not in allowed_channels:
@@ -55,11 +60,18 @@ def main() -> None:
             break
         descriptor_path = Path(entry["path"])
         output_path = args.output_dir
-        radial_output_path = args.radial_output_dir / f"LYA_M13_RADIAL__{entry['channel_name']}__MU{entry['mu_power']}.dat"
-        written_paths = write_packed_fftlog_matrices(descriptor_path, output_path, nmax=args.nmax, bias=DEFAULT_BIAS, backend=args.backend)
-        write_debug_radial_probe(descriptor_path, radial_output_path, backend=args.backend)
-        written.extend(path for path, _ in written_paths)
-        radial_written.append(radial_output_path)
+
+        if entry["status"] == "radial-1d":
+            data_path, _ = write_radial_1d_table(
+                descriptor_path, output_path, nmax=args.nmax, fftlogbias=DEFAULT_FFTLOGBIAS
+            )
+            written.append(data_path)
+        else:
+            radial_output_path = args.radial_output_dir / f"LYA_M13_RADIAL__{entry['channel_name']}__MU{entry['mu_power']}.dat"
+            written_paths = write_packed_fftlog_matrices(descriptor_path, output_path, nmax=args.nmax, fftlogbias=DEFAULT_FFTLOGBIAS, backend=args.backend)
+            write_debug_radial_probe(descriptor_path, radial_output_path, backend=args.backend)
+            written.extend(path for path, _ in written_paths)
+            radial_written.append(radial_output_path)
 
     print(f"Backend: {args.backend}")
     print(f"Wrote {len(written)} descriptor-backed production-kernel LyA tables to {args.output_dir}")

@@ -10,11 +10,14 @@
     "type": "none",
     "exchange_q_kmq": false
   },
-  "master_family": "LOS_SHIFTED_J",
+  "master_family": "RADIAL_1D",
+  "radial_kernel_type": "F3",
   "terms": [],
   "metadata": {
-    "status": "backend-import",
-    "import_source": "standard CLASS-PT P13 F3 radial kernel path",
-    "notes": "Intentional interface boundary: this channel is provided by the existing CLASS-PT F3/G3 infrastructure rather than the LOS shifted-J descriptor generator."
+    "status": "radial-1d",
+    "radial_kernel": "M13a_radial(nu) * M13b_F3(nu) = M13a(nu) * (9/8)",
+    "notes": "Standard SPT F3(k,q,-q) kernel. Isotropic (no LOS angle), contributes only at mu^0. Mellin representation avoids the |k+q|^2 denominator that prevents shifted-J reduction.",
+    "bias_contraction": "b1",
+    "mu_powers": [0]
   }
 }

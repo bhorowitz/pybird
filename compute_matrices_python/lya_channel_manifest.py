@@ -35,6 +35,7 @@ def build_manifest(descriptor_dir: Path) -> dict[str, object]:
         "descriptor_generated_entries": sum(1 for e in entries if e["status"] in {"sympy-reduced", "reducer-prototype"}),
         "physically_zero_entries": sum(1 for e in entries if e["status"] == "physically-zero"),
         "placeholder_entries": sum(1 for e in entries if e["status"] == "placeholder"),
+        "radial_1d_entries": sum(1 for e in entries if e["status"] == "radial-1d"),
         "entries": entries,
     }
     return summary

@@ -28,7 +28,7 @@ from lya_descriptor_runtime import (
     prepare_flattened_descriptor,
     split_descriptor_by_k_power,
 )
-from lya_master_library import COMPONENT_SHIFTS
+from lya_master_library import COMPONENT_SHIFTS, RADIAL_1D_KERNELS
 
 
 def load_descriptor(path: Path) -> dict:
@@ -36,7 +36,7 @@ def load_descriptor(path: Path) -> dict:
 
 
 DEFAULT_NMAX = 32
-DEFAULT_BIAS = 3.4
+DEFAULT_FFTLOGBIAS = -1.6
 DEFAULT_K0 = 5.0e-5
 DEFAULT_KMAX = 1.0e2
 DEFAULT_RADIAL_SAMPLES = 256
@@ -94,23 +94,23 @@ def build_physical_descriptor_evaluator(descriptor: dict, backend: str = "auto")
     return "runtime-fallback", evaluator
 
 
-def fftlog_grid(nmax: int = DEFAULT_NMAX, bias: float = DEFAULT_BIAS, k0: float = DEFAULT_K0, kmax: float = DEFAULT_KMAX) -> np.ndarray:
+def fftlog_grid(nmax: int = DEFAULT_NMAX, fftlogbias: float = DEFAULT_FFTLOGBIAS, k0: float = DEFAULT_K0, kmax: float = DEFAULT_KMAX) -> np.ndarray:
     delta = np.log(kmax / k0) / (nmax - 1)
     js = np.arange(-nmax / 2, nmax / 2 + 1, 1)
-    return bias + 2j * np.pi * js / nmax / delta
+    return fftlogbias + 2j * np.pi * js / nmax / delta
 
 
 def descriptor_matrix(
     descriptor: dict,
     nmax: int = DEFAULT_NMAX,
-    bias: float = DEFAULT_BIAS,
+    fftlogbias: float = DEFAULT_FFTLOGBIAS,
     k0: float = DEFAULT_K0,
     kmax: float = DEFAULT_KMAX,
     mu: float = 0.5,
     k: float = 0.2,
     backend: str = "auto",
 ) -> np.ndarray:
-    etam = fftlog_grid(nmax=nmax, bias=bias, k0=k0, kmax=kmax)
+    etam = fftlog_grid(nmax=nmax, fftlogbias=fftlogbias, k0=k0, kmax=kmax)
     size = nmax + 1
     mat = np.zeros((size, size), dtype=np.complex128)
     half = nmax / 2
@@ -131,11 +131,11 @@ def descriptor_matrix(
 def descriptor_matrix_kernel(
     descriptor: dict,
     nmax: int = DEFAULT_NMAX,
-    bias: float = DEFAULT_BIAS,
+    fftlogbias: float = DEFAULT_FFTLOGBIAS,
     k0: float = DEFAULT_K0,
     kmax: float = DEFAULT_KMAX,
 ) -> np.ndarray:
-    etam = fftlog_grid(nmax=nmax, bias=bias, k0=k0, kmax=kmax)
+    etam = fftlog_grid(nmax=nmax, fftlogbias=fftlogbias, k0=k0, kmax=kmax)
     size = nmax + 1
     mat = np.zeros((size, size), dtype=np.complex128)
     half = nmax / 2
@@ -169,7 +169,7 @@ def write_packed_fftlog_matrices(
     output_dir: Path,
     *,
     nmax: int = DEFAULT_NMAX,
-    bias: float = DEFAULT_BIAS,
+    fftlogbias: float = DEFAULT_FFTLOGBIAS,
     k0: float = DEFAULT_K0,
     kmax: float = DEFAULT_KMAX,
     backend: str = "auto",
@@ -180,7 +180,7 @@ def write_packed_fftlog_matrices(
     results: list[tuple[Path, Path]] = []
 
     for k_power, sector_descriptor in sorted(split.items()):
-        mat = descriptor_matrix_kernel(sector_descriptor, nmax=nmax, bias=bias, k0=k0, kmax=kmax)
+        mat = descriptor_matrix_kernel(sector_descriptor, nmax=nmax, fftlogbias=fftlogbias, k0=k0, kmax=kmax)
         packed = pack_lower_triangular(mat)
         output_path = output_dir / (
             f"LYA_M13__{descriptor['channel_name']}__MU{descriptor['mu_power']}__KPOW{k_power}.dat"
@@ -203,7 +203,7 @@ def write_packed_fftlog_matrices(
                 "nmax": nmax,
                 "matrix_size": nmax + 1,
                 "packed_size": int(packed.size),
-                "fftlog_bias": bias,
+                "fftlog_bias": fftlogbias,
                 "k0": k0,
                 "kmax": kmax,
                 "evaluation_backend": "kernel-only",
@@ -325,3 +325,72 @@ def write_packed_fftlog_matrix(*args, **kwargs):
 
 
 write_backend_radial_table = write_debug_radial_probe
+
+
+def write_radial_1d_table(
+    descriptor_path: Path,
+    output_dir: Path,
+    *,
+    nmax: int = DEFAULT_NMAX,
+    fftlogbias: float = DEFAULT_FFTLOGBIAS,
+    k0: float = DEFAULT_K0,
+    kmax: float = DEFAULT_KMAX,
+) -> tuple[Path, Path]:
+    """Write a 1D radial kernel vector for F3/G3 type T13 channels.
+
+    Unlike the 2D packed-matrix format used for shifted-J channels, the
+    F3 and G3 SPT kernels are isotropic and their P13 contribution reduces
+    to a 1D Mellin-space radial vector (one complex value per FFTLog mode).
+
+    Output file format: real block then imag block, length (nmax+1) each.
+
+    Returns
+    -------
+    (data_path, metadata_path)
+    """
+    descriptor = load_descriptor(descriptor_path)
+    radial_kernel_type = descriptor.get("radial_kernel_type")
+    if radial_kernel_type not in RADIAL_1D_KERNELS:
+        raise ValueError(
+            f"Descriptor {descriptor['channel_name']!r} has unsupported "
+            f"radial_kernel_type={radial_kernel_type!r}; "
+            f"expected one of {list(RADIAL_1D_KERNELS)}"
+        )
+    kernel_fn = RADIAL_1D_KERNELS[radial_kernel_type]
+
+    etam = fftlog_grid(nmax=nmax, fftlogbias=fftlogbias, k0=k0, kmax=kmax)
+    size = nmax + 1
+    vec = np.zeros(size, dtype=np.complex128)
+    for j in range(size):
+        nu1 = -0.5 * etam[j]
+        vec[j] = complex(kernel_fn(nu1))
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    channel_name = descriptor["channel_name"]
+    mu_power = descriptor["mu_power"]
+    output_path = output_dir / f"LYA_M13__{channel_name}__MU{mu_power}__RADIAL1D.dat"
+    stacked = np.concatenate([vec.real, vec.imag])
+    np.savetxt(output_path, stacked)
+
+    metadata = {
+        "format": "fftlog-radial-1d",
+        "artifact_role": "radial_1d_vector",
+        "generation_mode": "radial_1d_kernel",
+        "sector": descriptor.get("sector"),
+        "channel_name": channel_name,
+        "channel_id": descriptor.get("channel_id"),
+        "mu_power": mu_power,
+        "radial_kernel_type": radial_kernel_type,
+        "storage": {
+            "layout": "real-block-then-imag-block",
+            "nmax": nmax,
+            "vector_size": size,
+            "fftlog_bias": fftlogbias,
+            "k0": k0,
+            "kmax": kmax,
+        },
+        "source_descriptor": str(descriptor_path),
+    }
+    metadata_path = output_path.with_suffix(output_path.suffix + ".meta.json")
+    metadata_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
+    return output_path, metadata_path

@@ -10,11 +10,14 @@
     "type": "none",
     "exchange_q_kmq": false
   },
-  "master_family": "LOS_SHIFTED_J",
+  "master_family": "RADIAL_1D",
+  "radial_kernel_type": "G3",
   "terms": [],
   "metadata": {
-    "status": "backend-import",
-    "import_source": "standard CLASS-PT P13 G3 radial kernel path",
-    "notes": "Intentional interface boundary: this channel is provided by the existing CLASS-PT F3/G3 infrastructure rather than the LOS shifted-J descriptor generator."
+    "status": "radial-1d",
+    "radial_kernel": "M13a_radial(nu) * M13b_G3(nu) = M13a(nu) * (-1/(1+nu))",
+    "notes": "Standard SPT G3(q,-q,k) velocity-divergence kernel. The explicit mu^2 comes from the b_eta bias operator. Isotropic kernel, contributes only at mu^2. Mellin representation (CLASS-PT M13b index 4 convention).",
+    "bias_contraction": "b_eta * f",
+    "mu_powers": [2]
   }
 }

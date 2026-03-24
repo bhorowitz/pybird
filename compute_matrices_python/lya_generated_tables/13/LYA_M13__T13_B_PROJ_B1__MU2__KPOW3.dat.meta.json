@@ -13,10 +13,10 @@
     "nmax": 128,
     "matrix_size": 129,
     "packed_size": 8385,
-    "fftlog_bias": 3.4,
+    "fftlog_bias": -1.6,
     "k0": 5e-05,
     "kmax": 100.0,
     "evaluation_backend": "kernel-only"
   },
-  "source_descriptor": "/home/ben.horowitz/lya_eft/CLASS-PT/pt_matrices/compute_matrices_python/lya_descriptors/13/LYA_T13__T13_B_PROJ_B1__MU2.json"
+  "source_descriptor": "/home/ben.horowitz/pybird/compute_matrices_python/lya_descriptors/13/LYA_T13__T13_B_PROJ_B1__MU2.json"
 }

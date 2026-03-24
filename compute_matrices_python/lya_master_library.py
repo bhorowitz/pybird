@@ -872,3 +872,50 @@ def eval_master_component_cached(component: str, jcache: ShiftedJCache):
         )
 
     return eval_master_component(component, jcache.nu1, jcache.nu2)
+
+
+# ════════════════════════════════════════════════════════════════
+#  RADIAL 1D KERNELS  (for F3 / G3 P13 channels)
+# ════════════════════════════════════════════════════════════════
+#
+# The F3 and G3 SPT kernels at the (k, q, -q) kinematics require
+# the standard 1D Mellin-space radial kernel M13a, combined with a
+# channel-specific amplitude M13b:
+#
+#   P13_channel(k) = 2 P_lin(k) k^3 Re[ Σ_n c_n k^{2n} M13a(n) M13b_channel(n) ]
+#
+# Reference: Bernardeau et al. (2002); Ivanov et al. CLASS-PT.
+#
+# Convention: n1 = -0.5 * etam[j]  (FFTLog Mellin mode)
+
+
+def M13a_radial(nu1: complex) -> complex:
+    """Common P13 radial kernel: tan(ν π) / (14π (ν-3)(ν-2)(ν-1)ν).
+
+    This is the Mellin-space representation of the angle-averaged
+    F3(k, q, -q) kernel (and G3 kernel when combined with M13b_G3).
+    """
+    from mpmath import tan, pi as mppi
+    nu = complex(nu1)
+    return complex(tan(nu * mppi) / (14.0 * (nu - 3) * (nu - 2) * (nu - 1) * nu * mppi))
+
+
+def M13b_F3(nu1: complex) -> complex:
+    """Amplitude factor for T13_B_F3_B1: constant 9/8."""
+    return complex(9.0 / 8.0)
+
+
+def M13b_G3(nu1: complex) -> complex:
+    """Amplitude factor for T13_B_G3_BETA: -1/(1+ν).
+
+    This is the G3 velocity-divergence Mellin kernel (M13b index 4
+    in the CLASS-PT nonlinear.py convention).
+    """
+    nu = complex(nu1)
+    return complex(-1.0 / (1.0 + nu))
+
+
+RADIAL_1D_KERNELS = {
+    "F3": lambda nu: M13a_radial(nu) * M13b_F3(nu),
+    "G3": lambda nu: M13a_radial(nu) * M13b_G3(nu),
+}
