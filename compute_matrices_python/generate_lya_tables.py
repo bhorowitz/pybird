@@ -13,7 +13,10 @@ from lya_descriptor_writer import (
     write_debug_radial_probe,
     write_packed_fftlog_matrices,
     write_radial_1d_table,
+    write_shifted_j_p13_vectors,
 )
+
+PROJ_CHANNELS = {"T13_B_PROJ_B1", "T13_B_PROJ_BETA"}
 
 
 ROOT = Path(__file__).resolve().parent
@@ -66,6 +69,9 @@ def main() -> None:
                 descriptor_path, output_path, nmax=args.nmax, fftlogbias=DEFAULT_FFTLOGBIAS
             )
             written.append(data_path)
+        elif entry["channel_name"] in PROJ_CHANNELS:
+            written_paths = write_shifted_j_p13_vectors(descriptor_path, output_path, nmax=args.nmax, fftlogbias=DEFAULT_FFTLOGBIAS)
+            written.extend(path for path, _ in written_paths)
         else:
             radial_output_path = args.radial_output_dir / f"LYA_M13_RADIAL__{entry['channel_name']}__MU{entry['mu_power']}.dat"
             written_paths = write_packed_fftlog_matrices(descriptor_path, output_path, nmax=args.nmax, fftlogbias=DEFAULT_FFTLOGBIAS, backend=args.backend)

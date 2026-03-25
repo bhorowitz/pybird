@@ -28,7 +28,7 @@ from lya_descriptor_runtime import (
     prepare_flattened_descriptor,
     split_descriptor_by_k_power,
 )
-from lya_master_library import COMPONENT_SHIFTS, RADIAL_1D_KERNELS
+from lya_master_library import COMPONENT_SHIFTS, J, RADIAL_1D_KERNELS
 
 
 def load_descriptor(path: Path) -> dict:
@@ -325,6 +325,110 @@ def write_packed_fftlog_matrix(*args, **kwargs):
 
 
 write_backend_radial_table = write_debug_radial_probe
+
+
+def _eval_master_for_p13(component: str, nu1: complex, dn2_int: int) -> complex:
+    """Evaluate a master component at fixed integer nu2, handling Gamma poles.
+
+    In the T13 PROJ context, nu2 is a fixed integer (delta_nu2 from the
+    descriptor), not a free FFTLog variable.  J(nu1, nu2) = 0 whenever nu2
+    is a non-positive integer (1/Gamma(nu2) = 0 in the J definition).
+
+    Parameters
+    ----------
+    component : str
+        Name in COMPONENT_SHIFTS (e.g. "A2", "A3", "B4", ...).
+    nu1 : complex
+        Already-shifted Mellin variable (nu1_j + delta_nu1 from descriptor).
+    dn2_int : int
+        Fixed integer nu2 shift (delta_nu2 from descriptor).
+    """
+    shifts = COMPONENT_SHIFTS[component]
+    result = 0 + 0j
+    for weight, s1, s2 in shifts:
+        nu2_eff = dn2_int + int(s2)
+        if nu2_eff <= 0:   # non-positive integer -> 1/Gamma(nu2_eff) = 0 -> J = 0
+            continue
+        result += weight * J(nu1 + s1, nu2_eff)
+    return result
+
+
+def write_shifted_j_p13_vectors(
+    descriptor_path: Path,
+    output_dir: Path,
+    *,
+    nmax: int = DEFAULT_NMAX,
+    fftlogbias: float = DEFAULT_FFTLOGBIAS,
+    k0: float = DEFAULT_K0,
+    kmax: float = DEFAULT_KMAX,
+) -> list[tuple[Path, Path]]:
+    """Write 1D P13 radial vectors per k-power sector for PROJ-type T13 channels.
+
+    Unlike the 2D packed-matrix format, PROJ channels have a fixed (integer)
+    nu2 for the second loop variable after the angular integration.  The full
+    P13 integral reduces to a standard 1D sum:
+
+        P13(k) = 2 * P_lin(k) * k^{3+k_power}
+                 * Re[ sum_n c_n * k^{Pow_n} * V_{k_power}[n] ]
+
+    where V_{k_power}[n] = sum_terms coeff * master(nu_n + delta_nu1, delta_nu2).
+
+    Writes one file per k-power sector with filename:
+        LYA_M13__{channel}__MU{mu}__KPOW{kp}__P13VEC.dat
+
+    Format: real block (nmax+1 values) then imag block (nmax+1 values).
+    """
+    descriptor = load_descriptor(descriptor_path)
+    split = split_descriptor_by_k_power(descriptor)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    etam = fftlog_grid(nmax=nmax, fftlogbias=fftlogbias, k0=k0, kmax=kmax)
+    size = nmax + 1
+    results: list[tuple[Path, Path]] = []
+
+    channel_name = descriptor["channel_name"]
+    mu_power = descriptor["mu_power"]
+
+    for k_power, sector in sorted(split.items()):
+        vec = np.zeros(size, dtype=np.complex128)
+        for j in range(size):
+            nu1_j = -0.5 * etam[j]
+            for term in sector["terms"]:
+                coeff = term["coeff_rational"]["num"] / term["coeff_rational"]["den"]
+                dn1 = int(term["delta_nu1"])
+                dn2 = int(term["delta_nu2"])
+                mc = term["master_component"]
+                vec[j] += coeff * _eval_master_for_p13(mc, nu1_j + dn1, dn2)
+
+        output_path = output_dir / (
+            f"LYA_M13__{channel_name}__MU{mu_power}__KPOW{k_power}__P13VEC.dat"
+        )
+        stacked = np.concatenate([vec.real, vec.imag])
+        np.savetxt(output_path, stacked)
+
+        metadata = {
+            "format": "shifted-j-p13-1d",
+            "artifact_role": "p13_1d_vector",
+            "generation_mode": "shifted_j_p13_vector",
+            "sector": descriptor.get("sector"),
+            "channel_name": channel_name,
+            "channel_id": descriptor.get("channel_id"),
+            "mu_power": mu_power,
+            "k_power": int(k_power),
+            "storage": {
+                "layout": "real-block-then-imag-block",
+                "nmax": nmax,
+                "vector_size": size,
+                "fftlog_bias": fftlogbias,
+                "k0": k0,
+                "kmax": kmax,
+            },
+            "source_descriptor": str(descriptor_path),
+        }
+        metadata_path = output_path.with_suffix(output_path.suffix + ".meta.json")
+        metadata_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
+        results.append((output_path, metadata_path))
+
+    return results
 
 
 def write_radial_1d_table(
